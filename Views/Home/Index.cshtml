@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<h3>จำนวนพนักงานใช้บริการร้านค้า TLM</h3>
+<hr />
+<div class="row">
+    <div class="col-10">
+        <form method="post" asp-controller="User" asp-action="Search" class="d-flex align-items-center needs-validation" onsubmit="return validateForm()" novalidate>
+            <div class="form-group col-4 me-2">
+                <label for="startDate">Select Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate" required>
+            </div>
+            <div class="form-group col-4 me-5">
+                <label for="endDate">Select End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate" required>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary" type="submit">
+                    ค้นหา
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="col text-right">
+       <button class="btn btn-success">
+                <i class="bi bi-cloud-arrow-down"></i>
+                Export Excel
+       </button>
+    </div>
+</div>
+<div class="mt-4">
+    <table class="table">
+        <thead>
+            <th>ลำดับ</th>
+            <th>รหัสพนักงาน</th>
+            <th>ชื่อ-สกุล</th>
+            <th>แผนก</th>
+            <th>วันที่สแกน</th>
+            <th>เวลาสแกน</th>
+            <th>แผนก</th>
+            <th>จำนวนครั้ง</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>xx</td>
+                <td>xx</td>
+                <td>xx</td>
+                <td>xx</td>
+                <td>xx</td>
+                <td>xx</td>
+                <td>xxx</td>
+                <td>xxx</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<style>
+    .btn {
+        margin-top: 28px;
+        height: 40px;
+    }
+
+    .btn.btn-primary {
+        width: 100px;
+        opacity: 0.9;
+    }
+
+    form .form-control[type="date"] {
+        height: 40px;
+     }
+</style>
