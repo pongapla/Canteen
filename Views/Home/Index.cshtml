@@ -1,61 +1,203 @@
-﻿@{
+﻿@model List<SearchUser>;
+@using Microsoft.AspNetCore.Mvc
+
+@{
     ViewData["Title"] = "Home Page";
 }
-
-<h3>จำนวนพนักงานใช้บริการร้านค้า TLM</h3>
+<div class="mt-5">
+<h3 class="text-secondary">จำนวนพนักงานใช้บริการร้านค้า TLM</h3>
 <hr />
 <div class="row">
-    <div class="col-10">
-        <form method="post" asp-controller="User" asp-action="Search" class="d-flex align-items-center needs-validation" onsubmit="return validateForm()" novalidate>
+    <div class="col-8">
+        <form method="post" asp-controller="Home" asp-action="SearchUser" class="d-flex align-items-center needs-validation" onsubmit="return validateForm()" novalidate>
             <div class="form-group col-4 me-2">
                 <label for="startDate">Select Start Date</label>
-                <input type="date" class="form-control" id="startDate" name="startDate" required>
+                <input type="date" class="form-control col" id="startDate" name="startDate" required>
             </div>
-            <div class="form-group col-4 me-5">
+            <div class="form-group col-4 me-3">
                 <label for="endDate">Select End Date</label>
-                <input type="date" class="form-control" id="endDate" name="endDate" required>
+                <input type="date" class="form-control col" id="endDate" name="endDate" required>
             </div>
             <div class="col">
-                <button class="btn btn-primary" type="submit">
+                <button class="btn btn-outline-secondary" type="submit" style="width: 100px;">
                     ค้นหา
                     <i class="bi bi-search"></i>
                 </button>
             </div>
         </form>
     </div>
-    <div class="col text-right">
-       <button class="btn btn-success">
-                <i class="bi bi-cloud-arrow-down"></i>
-                Export Excel
-       </button>
+    <div class="col d-flex justify-content-end">
+        
+            <div class="col-auto me-1">
+            <button class="btn btn-outline-secondary" onclick="loadHIP()">
+                    ดึงข้อมูลจาก HIP
+                </button>
+            </div>
+            <div class="col-auto m-0">
+                <button class="btn btn-outline-success" onclick="ExportExcel()">
+                    <i class="bi bi-cloud-arrow-down"></i>
+                    Export Excel
+                </button>
+            </div>
     </div>
 </div>
 <div class="mt-4">
-    <table class="table">
-        <thead>
-            <th>ลำดับ</th>
-            <th>รหัสพนักงาน</th>
-            <th>ชื่อ-สกุล</th>
-            <th>แผนก</th>
-            <th>วันที่สแกน</th>
-            <th>เวลาสแกน</th>
-            <th>แผนก</th>
-            <th>จำนวนครั้ง</th>
-        </thead>
-        <tbody>
-            <tr>
-                <td>xx</td>
-                <td>xx</td>
-                <td>xx</td>
-                <td>xx</td>
-                <td>xx</td>
-                <td>xx</td>
-                <td>xxx</td>
-                <td>xxx</td>
-            </tr>
-        </tbody>
-    </table>
+    @if (Model != null && Model.Count > 0)
+    {
+        <table id="myTable" class="display">
+            <thead>
+                <tr>
+                    <th>ลำดับ</th>
+                    <th>รหัสพนักงาน</th>
+                    <th>ชื่อ-สกุล</th>
+                    <th>แผนก</th>
+                    <th>วันที่</th>
+                    <th>เวลา</th>
+                    <th>จำนวนครั้งสแกน</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td class="text-center">@user.No</td>
+                        <td class="text-center">@user.Code</td>
+                        <td>@user.Name</td>
+                        <td>@user.Department</td>
+                        <td>@user._DateTime</td>
+                        <td>@user._Time</td>
+                        <td class="text-center">@user.Total</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            ไม่พบข้อมูลพนักงาน เข้าใช้บริการ
+        </div>
+    }
 </div>
+</div>
+<div class="text-center">
+    <div class="spinner-grow d-none" role="status">
+        <span class="visually-hidden"></span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+
+<script>
+    var js = jQuery.noConflict(true);
+    js(document).ready(function () {
+        var table = js('#myTable').DataTable({
+            "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        });
+    });
+
+    async function loadHIP() {
+        var loadingSpinners = document.querySelectorAll(".spinner-grow");
+        loadingSpinners.forEach(function (spinner) {
+            spinner.classList.remove("d-none");
+        });
+
+        // Reduce the opacity of the element with class ".mt-5"
+        document.querySelector(".mt-5").style.opacity = 0.2;
+
+        try {
+            const response = await fetch("/Home/GetDataInSert", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            // Remove the spinners when the response is ok
+            loadingSpinners.forEach(function (spinner) {
+                spinner.classList.add("d-none");
+            });
+
+            // Reset the opacity of the element with class ".mt-5"
+            document.querySelector(".mt-5").style.opacity = 1;
+
+            Swal.fire({
+                title: "Download data successed",
+                text: "ดึงข้อมูลจากเครื่อง HIP เสร็จแล้ว!",
+                icon: "success"
+            });
+
+        } catch (error) {
+            console.error("There was a problem with your fetch operation:", error);
+
+            // Remove the spinners in case of error as well
+            loadingSpinners.forEach(function (spinner) {
+                spinner.classList.add("d-none");
+            });
+
+            // Reset the opacity of the element with class ".mt-5"
+            document.querySelector(".mt-5").style.opacity = 1;
+        }
+    }
+
+    async function ExportExcel() {
+       
+        modelData = [];
+        console.log('test');
+        this.modelData = [
+        @foreach (var user in Model)
+        {
+            <text>
+                    {
+                        No: '@user.No',
+                        Code: '@user.Code',
+                        Name: '@Html.Raw(Json.Serialize(user.Name))',
+                        Department: '@Html.Raw(Json.Serialize(user.Department))',
+                        _DateTime: '@user._DateTime',
+                        _Time: '@user._Time',
+                        Total: '@user.Total'
+                    },
+            </text>
+        }
+        ];
+        
+        console.log(modelData);
+        try {
+            const response = await fetch("/Home/ExportExcel", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(modelData)
+            });
+            
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "DataCanteen.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error("There was a problem with your fetch operation:", error);
+        }
+    }
+
+</script>
+
 <style>
     .btn {
         margin-top: 28px;
@@ -69,5 +211,17 @@
 
     form .form-control[type="date"] {
         height: 40px;
-     }
+    }
+
+    .dt-input{
+        margin-right: 5px;
+    }
+
+    .spinner-grow {
+        position: absolute;
+        top: 400px;
+        left: 600px;
+        width: 50px;
+        height: 50px;
+    }
 </style>

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TLM_Canteen")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+72decf253620c6340f58702c049a2f1fe9fad648")]
 [assembly: System.Reflection.AssemblyProductAttribute("TLM_Canteen")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TLM_Canteen")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

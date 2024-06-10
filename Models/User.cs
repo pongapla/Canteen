@@ -1,12 +1,14 @@
 ﻿namespace TLM_Canteen.Models;
 
-public class User
+public class SearchUser
 {
-    public string UserName { get; set; }
+    public int No { get; set; } 
+    public string Code { get; set; }
+    public string Name { get; set; }
     public string Department { get; set; }
-    public DateTime? _Date { get; set; }
-    public string Time {  get; set; }
-    public int Total { get; set; }
+    public string _DateTime { get; set; } 
+    public string _Time { get; set; }
+    public int? Total { get; set; }
 }
 
 public class CheckInout  
