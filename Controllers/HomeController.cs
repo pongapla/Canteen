@@ -44,7 +44,7 @@ namespace TLM_Canteen.Controllers
                                     LEFT JOIN
                                         [TLM_Employee] te ON ti.[CodeEm] = te.[EmpCode]
                                     WHERE
-                                        ti.[DateTime] BETWEEN ? AND ?
+                                        ti.[DateTime] BETWEEN ? AND DATEADD(""d"", 1,?)
                                     GROUP BY
                                         te.[EmpCode],
                                         te.[EmpFNameThai],

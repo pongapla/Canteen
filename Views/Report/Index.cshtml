@@ -1,0 +1,229 @@
+﻿@model List<Report>;
+@using Microsoft.AspNetCore.Mvc
+@{
+    ViewData["Title"] = "Report Page";
+}
+<div class="mt-5">
+    <h3 class="text-secondary">รายงานสรุปจำนวนสแกนนิ้วใช้บริการห้องอาหาร</h3>
+    <hr />
+    <div class="row">
+        <div class="col-8">
+             <form method="post" asp-controller="Report" asp-action="Index" class="d-flex align-items-center needs-validation" onsubmit="return validateForm()" novalidate>
+                 <div class="form-group col-4 me-2">
+                    <label for="startDate">Select Start Date</label>
+                    <input type="date" class="form-control col" id="startDate" name="startDate" required>
+                 </div>
+                    <div class="form-group col-4 me-3">
+                        <label for="endDate">Select End Date</label>
+                        <input type="date" class="form-control col" id="endDate" name="endDate" required>
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-outline-secondary" type="submit" style="width: 100px;">
+                            ค้นหา
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+             </form>
+            </div>
+            <div class="col d-flex justify-content-end">
+            <div class="col-auto m-0 me-2">
+                <button class="btn btn-outline-secondary" onclick="ExportPDF()">
+                    <i class="bi bi-cloud-arrow-down"></i>
+                    Export PDF
+                </button>
+            </div>
+                <div class="col-auto m-0">
+                    <button class="btn btn-outline-success" onclick="ExportExcel()">
+                        <i class="bi bi-cloud-arrow-down"></i>
+                        Export Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-2">
+            
+        @if (Model != null && Model.Count > 0)
+            {
+            <table id="myTable" class="display">
+                <thead>
+                    <tr>
+                        <th class="text-center">วันที่</th>
+                        <th class="text-center">จำนวนที่สแกนนิ้ว</th>
+                        <th class="text-center">รวมเป็นเงิน</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@item._Date.ToString()</td>
+                            <td class="text-center">@item.TotalScan</td>
+                            <td class="text-center">@item.TotalPrice</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th style="text-align:right">Total:</th>
+                        <th id="total-scan" class="text-center">0</th>
+                        <th id="total-price" class="text-center">0</th> 
+                    </tr>
+                </tfoot>
+                </table>
+            } else
+            {
+            <div class="alert alert-warning mt-3" role="alert">
+                ไม่พบข้อมูลรายงาน
+            </div>
+            }
+        </div>  
+</div>
+<div class="text-center">
+    <div class="spinner-grow d-none" role="status">
+        <span class="visually-hidden"></span>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+<script>
+    var js = jQuery.noConflict(true);
+    js(document).ready(function () {
+        var table = js('#myTable').DataTable({
+            "paging": false,
+            "footerCallback": function (row, data, start, end, display) {
+                
+                //Do whatever you want. Example:
+                var totalScan = 0;
+                var totalPrice = 0;
+                for (var i = 0; i < data.length; i++) {
+                    totalScan += parseFloat(data[i][1]);
+                    totalPrice += parseFloat(data[i][2]);
+                }
+
+                    totalScan = new Intl.NumberFormat().format(totalScan)
+                    totalPrice = new Intl.NumberFormat().format(totalPrice)
+
+                    js('#total-scan').html(totalScan);
+                    js('#total-price').html(totalPrice);
+            }
+        });
+    });
+
+    
+
+    async function ExportExcel() {
+       
+        modelData = [];
+        this.modelData = [
+            @foreach (var item in Model)
+            {
+                <text>
+                        {
+                            _Date: '@item._Date',
+                            TotalScan: '@item.TotalScan',
+                            TotalPrice: '@item.TotalPrice',
+                        },
+                </text>
+            }
+        ];
+
+       
+        try {
+            const response = await fetch("/Report/ExportExcel", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(modelData)
+            });
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "SumCanteen.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+           
+        } catch (error) {
+            console.error("There was a problem with your fetch operation:", error);
+        }
+    }
+
+    async function ExportPDF() {
+        modelData = [];
+        this.modelData = [
+            @foreach (var item in Model)
+                    {
+                @:{
+                @:_Date: '@item._Date',
+                @:TotalScan: '@item.TotalScan',
+                @:TotalPrice: '@item.TotalPrice'
+                @: },
+            }
+        ];
+
+        try {
+            const response = await fetch("/Report/ExportPDF", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(modelData)
+            });
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "SumCanteen.PDF";
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error("There was a problem with your fetch operation:", error);
+        }
+    }
+</script>
+
+<style>
+
+    .sorting_1 {
+        width: 10px;
+    }
+
+    .dt-type-numeric {
+        width: 400px;
+    }
+
+    .btn {
+        margin-top: 28px;
+        height: 40px;
+    }
+
+    .dt-input {
+        margin-right: 5px;
+    }
+
+    .spinner-grow {
+        position: absolute;
+        top: 400px;
+        left: 600px;
+        width: 50px;
+        height: 50px;
+    }
+</style>
+                       

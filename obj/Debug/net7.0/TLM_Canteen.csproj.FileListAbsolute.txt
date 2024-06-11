@@ -70,3 +70,16 @@ D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\obj\Debug\net7.0\
 D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\obj\Debug\net7.0\TLM_Canteen.pdb
 D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\obj\Debug\net7.0\TLM_Canteen.genruntimeconfig.cache
 D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\obj\Debug\net7.0\ref\TLM_Canteen.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.barcodes.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.forms.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.io.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.kernel.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.layout.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.pdfa.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.sign.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.styledxmlparser.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.svg.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\itext.commons.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\Microsoft.DotNet.PlatformAbstractions.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\Newtonsoft.Json.dll
+D:\General\DataBaseCanteen\TLM_Canteen\TLM_Canteen\TLM_Canteen\bin\Debug\net7.0\BouncyCastle.Crypto.dll

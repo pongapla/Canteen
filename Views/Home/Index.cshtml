@@ -150,7 +150,7 @@
     async function ExportExcel() {
        
         modelData = [];
-        console.log('test');
+        
         this.modelData = [
         @foreach (var user in Model)
         {
@@ -168,7 +168,7 @@
         }
         ];
         
-        console.log(modelData);
+       
         try {
             const response = await fetch("/Home/ExportExcel", {
                 method: "POST",
@@ -194,6 +194,13 @@
         } catch (error) {
             console.error("There was a problem with your fetch operation:", error);
         }
+    }
+
+    function validateForm() {
+        var loadingSpinners = document.querySelectorAll(".spinner-grow");
+        loadingSpinners.forEach(function (spinner) {
+            spinner.classList.remove("d-none");
+        });
     }
 
 </script>
