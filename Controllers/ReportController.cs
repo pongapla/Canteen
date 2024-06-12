@@ -11,6 +11,7 @@ using iText.Layout;
 
 
 
+
 namespace TLM_Canteen.Controllers;
 
 public class ReportController : Controller
@@ -27,20 +28,22 @@ public class ReportController : Controller
 
             try
             {
-                string query = @"SELECT DISTINCT 
-                        FORMAT(ti.[DateTime], 'dd-MM-yyyy') AS _DateTime,
-                        COUNT(ti.CodeEm) AS TotalScan,
-                        COUNT(ti.CodeEm) * (SELECT Price FROM [TLM_Price] WHERE CodeP = '001') AS TotalPrice
+                string query = @"SELECT 
+                            FORMAT(ti1.[DateTime], 'dd-MM-yyyy') AS _DateTime,
+                            COUNT(ti1.[CodeEm]) AS TotalScan,
+                            Count(ti1.[CodeEm]) * (SELECT Price FROM [TLM_Price] WHERE CodeP = '001') AS TotalPrice
                         FROM 
-                            [TLM_TimeIn] ti
-                        WHERE ti.[DateTime] BETWEEN ? AND DATEADD(""d"", 1,?)
+                            [TLM_TimeIn] ti1
+                        WHERE 
+                            ti1.[DateTime] BETWEEN ? AND DATEADD('d', 1, ?) AND Status <> 'Incative'
                         GROUP BY 
-                            FORMAT(ti.[DateTime], 'dd-MM-yyyy')";
+                            FORMAT(ti1.[DateTime], 'dd-MM-yyyy')";
 
                 using (OleDbCommand command = new OleDbCommand(query, connection))
                 {
                     command.Parameters.Add(new OleDbParameter(" ? ", OleDbType.Date) { Value = DateTime.Parse(startDate) });
                     command.Parameters.Add(new OleDbParameter("?", OleDbType.Date) { Value = DateTime.Parse(endDate) });
+
 
                     connection.Open();
                     using (OleDbDataReader reader = command.ExecuteReader())
@@ -67,7 +70,7 @@ public class ReportController : Controller
 
             }
         }
-
+        
         return View(ReportList);
     }
 
@@ -181,35 +184,42 @@ public class ReportController : Controller
                 document.Add(title);
 
                 // Table
-                Table table = new Table(new float[] { 3, 3, 3 });
+                Table table = new Table(new float[] { 6, 6, 3, 6, 6, 6 });
                 table.SetWidth(UnitValue.CreatePercentValue(100));
 
                 // Table Header
-                table.AddHeaderCell(new Cell().Add(new Paragraph("วันที่").AddStyle(headerStyle)));
-                table.AddHeaderCell(new Cell().Add(new Paragraph("จำนวนที่สแกนนิ้ว").AddStyle(headerStyle)));
-                table.AddHeaderCell(new Cell().Add(new Paragraph("รวมเป็นเงิน").AddStyle(headerStyle)));
+                table.AddHeaderCell(new Cell().Add(new Paragraph("วันที่").AddStyle(headerStyle).SetTextAlignment(TextAlignment.CENTER)));
+                table.AddHeaderCell(new Cell().Add(new Paragraph("จำนวนที่สแกนนิ้ว").AddStyle(headerStyle).SetTextAlignment(TextAlignment.CENTER)));
+                table.AddHeaderCell(new Cell().Add(new Paragraph("รวมเป็นเงิน").AddStyle(headerStyle).SetTextAlignment(TextAlignment.CENTER)));
+                table.AddHeaderCell(new Cell().Add(new Paragraph("ลายเซ็นต์  HR").AddStyle(headerStyle).SetTextAlignment(TextAlignment.CENTER) ));
+                table.AddHeaderCell(new Cell().Add(new Paragraph("ลายเซ็นต์แม่ค้า").AddStyle(headerStyle).SetTextAlignment(TextAlignment.CENTER)));
+                table.AddHeaderCell(new Cell().Add(new Paragraph("หมายเหตุ").AddStyle(headerStyle).SetTextAlignment(TextAlignment.CENTER)));
 
                 // Table Content
                 foreach (var item in modelData)
                 {
-                    table.AddCell(new Cell().Add(new Paragraph(item._Date).SetFont(font)));
-                    table.AddCell(new Cell().Add(new Paragraph(item.TotalScan).SetFont(font)));
-                    table.AddCell(new Cell().Add(new Paragraph(item.TotalPrice).SetFont(font)));
+                    table.AddCell(new Cell().Add(new Paragraph(item._Date).SetFont(font).SetTextAlignment(TextAlignment.CENTER)));
+                    table.AddCell(new Cell().Add(new Paragraph(item.TotalScan).SetFont(font).SetTextAlignment(TextAlignment.CENTER)));
+                    table.AddCell(new Cell().Add(new Paragraph(item.TotalPrice).SetFont(font).SetTextAlignment(TextAlignment.RIGHT)));
+                    table.AddCell(new Cell().Add(new Paragraph("")).SetFont(font)); // ลายเซ็นต์ HR (ว่าง)
+                    table.AddCell(new Cell().Add(new Paragraph("")).SetFont(font)); // ลายเซ็นต์แม่ค้า (ว่าง)
+                    table.AddCell(new Cell().Add(new Paragraph("")).SetFont(font)); // หมายเหตุ (ว่าง)
                 }
 
                 // Add total row
-                table.AddCell(new Cell().Add(new Paragraph("Total:").SetFont(font)));
-                table.AddCell(new Cell().Add(new Paragraph(totalScan.ToString("N0")).SetFont(font))); // formatted with thousands separator
-                table.AddCell(new Cell().Add(new Paragraph(totalPrice.ToString("N0")).SetFont(font))); // formatted with thousands separator
-
+                table.AddCell(new Cell().Add(new Paragraph("Total:").SetFont(font).SetTextAlignment(TextAlignment.CENTER)));
+                table.AddCell(new Cell().Add(new Paragraph(totalScan.ToString("N0")).SetFont(font).SetTextAlignment(TextAlignment.CENTER))); // formatted with thousands separator
+                table.AddCell(new Cell().Add(new Paragraph(totalPrice.ToString("N0")).SetFont(font).SetTextAlignment(TextAlignment.RIGHT))); // formatted with thousands separator
+                
                 // Add table to document
                 document.Add(table);
 
                 // Signature
-                Paragraph signature = new Paragraph("คุณเดชาวัต โพธิ์วงค์\n(ผู้จัดการแผนกทรัพยากรมนุษย์และการบริหาร)")
+                Paragraph signature = new Paragraph("(................................)\nคุณเดชาวัต โพธิ์วงค์\n(ผู้จัดการแผนกทรัพยากรมนุษย์และการบริหาร)")
                     .SetTextAlignment(TextAlignment.CENTER) // จัดวางให้ตรงกลางทั้งแนวตั้งและแนวนอน
                     .SetHorizontalAlignment(HorizontalAlignment.CENTER)
                     .SetMarginTop(40)
+                    .SetFontSize(18)
                     .SetFont(font);
                 document.Add(signature);
 

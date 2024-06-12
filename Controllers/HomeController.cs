@@ -196,6 +196,35 @@ namespace TLM_Canteen.Controllers
                         }
                         connection.Close();
                     }
+                    // ตรวจสอบข้อมูลซ้ำและเปลี่ยนสถานะ เป็น Inactive
+
+                    string query4 = "UPDATE TLM_TimeIn SET Status = 'Inactive' WHERE CodeEm = ? AND FORMAT([DateTime], 'dd-MM-yyyy') = ?";
+                    foreach (var check in checkList)
+                    {
+                        connection.Open();
+                        using (OleDbCommand command = new OleDbCommand(query4, connection))
+                        {
+                            string checkDuplicate = "SELECT COUNT(*) FROM TLM_TimeIn WHERE CodeEm = ? AND FORMAT([DateTime], 'dd-MM-yyyy') = ?";
+                            int rowCount = 0;
+                            using (OleDbCommand checkCommand = new OleDbCommand(checkDuplicate, connection))
+                            {
+                                checkCommand.Parameters.Add(new OleDbParameter("CodeEm", OleDbType.VarChar)).Value = check.Code;
+                                checkCommand.Parameters.Add(new OleDbParameter("DateTime", OleDbType.Date)).Value = check._DateTime.ToString("dd-MM-yyyy");
+                                rowCount = (int)checkCommand.ExecuteScalar();
+                            }
+
+                            if (rowCount > 0)
+                            {
+                                int rowsAffected = command.ExecuteNonQuery();
+                            }
+                            else
+                            {
+                                Console.WriteLine("Duplicate data found. No data updated.");
+                            }
+
+                        }
+                        connection.Close();
+                    }
 
                 }
                 catch (Exception ex)

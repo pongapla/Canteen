@@ -5,7 +5,38 @@
     ViewData["Title"] = "Home Page";
 }
 <div class="mt-5">
-<h3 class="text-secondary">จำนวนพนักงานใช้บริการร้านค้า TLM</h3>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-6">
+                <h3 class="text-secondary">จำนวนพนักงานใช้บริการร้านค้า TLM</h3>
+            </div>
+        
+            <div class="col-6 text-end">
+                @{
+                    int duplicateCount = 0;
+
+                    // ใช้ลูป foreach เพื่อเข้าถึงข้อมูลในโมเดล
+                    foreach (var item1 in Model)
+                    {
+                        foreach (var item2 in Model)
+                        {
+                            // เช็คเงื่อนไขว่าวันที่และรหัสพนักต้องตรงกัน และไม่ใช่รายการเดียวกัน
+                            if (item1._DateTime == item2._DateTime && item1.Code == item2.Code && item1 != item2)
+                            {
+                                // หากเงื่อนไขเป็นจริง ให้เพิ่มค่าตัวแปร duplicateCount
+                                duplicateCount++;
+                            }
+                        }
+                    }
+                }
+                
+                <button type="button" class="btn btn-outline-danger">
+                    มีข้อมูลซ้ำ
+                    <span class="badge text-bg-danger @((duplicateCount > 0) ? "text-danger" : "")">@duplicateCount</span>
+                </button>
+            </div>
+       </div> 
+   </div>
 <hr />
 <div class="row">
     <div class="col-8">
@@ -27,7 +58,6 @@
         </form>
     </div>
     <div class="col d-flex justify-content-end">
-        
             <div class="col-auto me-1">
             <button class="btn btn-outline-secondary" onclick="loadHIP()">
                     ดึงข้อมูลจาก HIP
@@ -59,7 +89,7 @@
             <tbody>
                 @foreach (var user in Model)
                 {
-                    <tr>
+                    <tr id="row-@user.No">
                         <td class="text-center">@user.No</td>
                         <td class="text-center">@user.Code</td>
                         <td>@user.Name</td>
@@ -90,7 +120,7 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
 <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 <script>
     var js = jQuery.noConflict(true);
     js(document).ready(function () {
@@ -203,6 +233,30 @@
         });
     }
 
+
+    var rows = document.querySelectorAll('tr'); // เลือกทุกแถวในตาราง
+
+    // สร้างอาร์เรย์เพื่อเก็บรายการที่มีอยู่แล้ว
+    var existingItems = [];
+
+    // ใช้ forEach เพื่อเข้าถึงแต่ละแถว
+    rows.forEach(function (row) {
+        var dateCell = row.querySelector('td:nth-child(5)'); // เลือก cell ที่มีวันที่
+        var codeCell = row.querySelector('td:nth-child(2)'); // เลือก cell ที่มี code
+
+        if (dateCell && codeCell) {
+            var date = dateCell.textContent.trim(); // รับข้อมูลวันที่จาก cell
+            var code = codeCell.textContent.trim(); // รับข้อมูล code จาก cell
+
+            var key = date + "-" + code;
+
+            if (existingItems.includes(key)) { // ตรวจสอบว่า key ซ้ำหรือไม่
+                row.style.backgroundColor = 'red'; // เปลี่ยนสีพื้นหลังเป็นสีแดง
+            } else {
+                existingItems.push(key); // เพิ่ม key ลงในอาร์เรย์
+            }
+        }
+    });
 </script>
 
 <style>
