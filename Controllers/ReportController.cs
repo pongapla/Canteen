@@ -18,50 +18,54 @@ public class ReportController : Controller
 {
     public IActionResult Index(string? startDate, string? endDate)
     {
-        IConfiguration configuration = new ConfigurationBuilder()
+        List<Report> ReportList = new List<Report>();
+        if (startDate == null && endDate == null)
+        {
+            return View(ReportList);
+        }
+            IConfiguration configuration = new ConfigurationBuilder()
                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                .Build();
         string connectionString = configuration.GetConnectionString("AccessConnection");
-        List<Report> ReportList = new List<Report>();
+        
         using (OleDbConnection connection = new OleDbConnection(connectionString))
         {
 
             try
             {
-                string query = @"SELECT 
-                            FORMAT(ti1.[DateTime], 'dd-MM-yyyy') AS _DateTime,
-                            COUNT(ti1.[CodeEm]) AS TotalScan,
-                            Count(ti1.[CodeEm]) * (SELECT Price FROM [TLM_Price] WHERE CodeP = '001') AS TotalPrice
-                        FROM 
-                            [TLM_TimeIn] ti1
-                        WHERE 
-                            ti1.[DateTime] BETWEEN ? AND DATEADD('d', 1, ?) AND Status <> 'Incative'
-                        GROUP BY 
-                            FORMAT(ti1.[DateTime], 'dd-MM-yyyy')";
+                string query = @"SELECT  FORMAT([DateTime], 'dd-MM-yyyy') AS _DateTime,
+                COUNT([CodeEm]) AS TotalScan,
+                COUNT([CodeEm]) * (SELECT Price FROM [TLM_Price] WHERE CodeP = '001') AS TotalPrice
+                FROM [TLM_Report]
+                WHERE [DateTime] BETWEEN ? AND DateAdd('d', 1,?)
+                GROUP BY FORMAT([DateTime], 'dd-MM-yyyy')";
 
-                using (OleDbCommand command = new OleDbCommand(query, connection))
-                {
-                    command.Parameters.Add(new OleDbParameter(" ? ", OleDbType.Date) { Value = DateTime.Parse(startDate) });
-                    command.Parameters.Add(new OleDbParameter("?", OleDbType.Date) { Value = DateTime.Parse(endDate) });
-
-
-                    connection.Open();
-                    using (OleDbDataReader reader = command.ExecuteReader())
+               
+                    using (OleDbCommand command = new OleDbCommand(query, connection))
                     {
-                        int i = 1;
-                        while (reader.Read())
+                        //command.Parameters.Add(new OleDbParameter(" ? ", OleDbType.Date) { Value = DateTime.Parse(startDate) });
+                        //command.Parameters.Add(new OleDbParameter("?", OleDbType.Date) { Value = DateTime.Parse(endDate) });
+                        command.Parameters.AddWithValue("?", DateTime.Parse(startDate));
+                        command.Parameters.AddWithValue("?", DateTime.Parse(endDate));
+
+                        connection.Open();
+                        using (OleDbDataReader reader = command.ExecuteReader())
                         {
-                            var report = new Report()
+                            int i = 1;
+                            while (reader.Read())
                             {
-                                
-                                _Date = reader["_DateTime"].ToString(),
-                                TotalScan = reader["TotalScan"].ToString(),
-                                TotalPrice = reader["TotalPrice"].ToString(),
-                            };
-                            ReportList.Add(report);
+                                var report = new Report()
+                                {
+
+                                    _Date = reader["_DateTime"].ToString(),
+                                    TotalScan = reader["TotalScan"].ToString(),
+                                    TotalPrice = reader["TotalPrice"].ToString(),
+                                };
+                                ReportList.Add(report);
+                            }
                         }
                     }
-                }
+               
             }
             catch (Exception ex)
             {

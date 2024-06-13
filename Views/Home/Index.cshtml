@@ -28,11 +28,13 @@
                             }
                         }
                     }
+                    duplicateCount = (duplicateCount / 2);
                 }
                 
                 <button type="button" class="btn btn-outline-danger">
                     มีข้อมูลซ้ำ
                     <span class="badge text-bg-danger @((duplicateCount > 0) ? "text-danger" : "")">@duplicateCount</span>
+                    คน
                 </button>
             </div>
        </div> 

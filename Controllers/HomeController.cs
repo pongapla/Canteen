@@ -157,7 +157,7 @@ namespace TLM_Canteen.Controllers
                         connection.Close();
                     }
 
-                    string query3 = @"INSERT INTO TLM_TimeIn (CodeEm, [DateTime], [Time])
+                    string query3 = @"INSERT INTO TLM_TimeIn ([DateTime], CodeEm, [Time])
                             VALUES (?,?,?)";
 
                     foreach (var check in checkList)
@@ -179,8 +179,9 @@ namespace TLM_Canteen.Controllers
                             {
                                 check.Code = check.Code.PadLeft(4, '0');
                             }
-                            command.Parameters.Add(new OleDbParameter("CodeEm", OleDbType.VarChar)).Value = check.Code;
+                            
                             command.Parameters.Add(new OleDbParameter("DateTime", OleDbType.Date)).Value = check._DateTime; // yyyy, MM, dd, HH, mm, ss
+                            command.Parameters.Add(new OleDbParameter("CodeEm", OleDbType.VarChar)).Value = check.Code;
                             command.Parameters.Add(new OleDbParameter("Time", OleDbType.VarChar)).Value = check._DateTime.TimeOfDay.ToString();
 
 
@@ -198,28 +199,35 @@ namespace TLM_Canteen.Controllers
                     }
                     // ตรวจสอบข้อมูลซ้ำและเปลี่ยนสถานะ เป็น Inactive
 
-                    string query4 = "UPDATE TLM_TimeIn SET Status = 'Inactive' WHERE CodeEm = ? AND FORMAT([DateTime], 'dd-MM-yyyy') = ?";
+                    string query4 = @"INSERT INTO TLM_Report ([DateTime], CodeEm, [Time])
+                            VALUES (?,?,?)";
                     foreach (var check in checkList)
                     {
                         connection.Open();
                         using (OleDbCommand command = new OleDbCommand(query4, connection))
                         {
-                            string checkDuplicate = "SELECT COUNT(*) FROM TLM_TimeIn WHERE CodeEm = ? AND FORMAT([DateTime], 'dd-MM-yyyy') = ?";
-                            int rowCount = 0;
-                            using (OleDbCommand checkCommand = new OleDbCommand(checkDuplicate, connection))
+                            string checkDuplicate2 = "SELECT count([CodeEm]) FROM TLM_Report WHERE [CodeEm] = ? AND DateValue([DateTime]) = ?";
+                            int rowCount2 = 0;
+                            using (OleDbCommand checkCommand = new OleDbCommand(checkDuplicate2, connection))
                             {
+                                var _NewDate = check._DateTime.ToString("yyyy-MM-dd");
                                 checkCommand.Parameters.Add(new OleDbParameter("CodeEm", OleDbType.VarChar)).Value = check.Code;
-                                checkCommand.Parameters.Add(new OleDbParameter("DateTime", OleDbType.Date)).Value = check._DateTime.ToString("dd-MM-yyyy");
-                                rowCount = (int)checkCommand.ExecuteScalar();
+                                checkCommand.Parameters.Add(new OleDbParameter("DateTime", OleDbType.Date)).Value = _NewDate.ToString();
+                                rowCount2 = (int)checkCommand.ExecuteScalar();
                             }
 
-                            if (rowCount > 0)
+                            command.Parameters.Add(new OleDbParameter("DateTime", OleDbType.Date)).Value = check._DateTime; // yyyy, MM, dd, HH, mm, ss
+                            command.Parameters.Add(new OleDbParameter("CodeEm", OleDbType.VarChar)).Value = check.Code;
+                            command.Parameters.Add(new OleDbParameter("Time", OleDbType.VarChar)).Value = check._DateTime.TimeOfDay.ToString();
+
+                            if (rowCount2 > 0)
                             {
-                                int rowsAffected = command.ExecuteNonQuery();
+                                Console.WriteLine("Duplicate data found. No data updated.");
+                                
                             }
                             else
                             {
-                                Console.WriteLine("Duplicate data found. No data updated.");
+                                int rowsAffected = command.ExecuteNonQuery();
                             }
 
                         }
