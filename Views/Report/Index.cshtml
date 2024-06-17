@@ -197,6 +197,33 @@
             console.error("There was a problem with your fetch operation:", error);
         }
     }
+
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const today = new Date();
+        const day = today.getDate();  // Get the day of the month (1-31)
+        const month = today.getMonth() + 1;  // Get the month (0-11, hence +1 to make it 1-12)
+        const year = today.getFullYear();  // Get the full year
+        // Check if the current day is between 1 and 15
+        if (day >= 1 && day <= 15) {
+            // Set the startDate to the 1st of the current month
+            const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+            document.getElementById('startDate').value = startDate;
+            // Set the endDate to the 15 of the current month
+            const endDate = `${year}-${String(month).padStart(2, '0')}-15`;
+            document.getElementById('endDate').value = endDate;
+        } else {
+
+            const lastDayOfMonth = new Date(year, month, 0).getDate();
+
+            // Set the startDate to the 16st of the current month
+            const startDate = `${year}-${String(month).padStart(2, '0')}-16`;
+            document.getElementById('startDate').value = startDate;
+            // Set the endDate to the 30st or 31st of the current month
+            const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDayOfMonth).padStart(2, '0')}`;
+            document.getElementById('startDate').value = endDate;
+        }
+    });
 </script>
 
 <style>
